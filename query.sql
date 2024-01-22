@@ -5,5 +5,5 @@ CREATE TABLE `nd_properties` (
     `address` VARCHAR(250) DEFAULT NULL,
     `sale` INT(11) DEFAULT NULL,
     INDEX `owner` (`owner`) USING BTREE,
-    CONSTRAINT `property_owner` FOREIGN KEY (`owner`) REFERENCES `characters` (`character_id`) ON UPDATE CASCADE ON DELETE CASCADE
+    CONSTRAINT `property_owner` FOREIGN KEY (`owner`) REFERENCES `nd_characters` (`charid`) ON UPDATE CASCADE ON DELETE CASCADE
 );

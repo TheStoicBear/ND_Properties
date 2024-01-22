@@ -15,6 +15,7 @@ ui_page "ui/index.html"
 
 shared_scripts {
     "@ox_lib/init.lua",
+    "@ND_Core/init.lua",
     "config.lua"
 }
 server_scripts {

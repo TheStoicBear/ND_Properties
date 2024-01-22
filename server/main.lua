@@ -1,11 +1,9 @@
-NDCore = exports["ND_Core"]:GetCoreObject()
-
 RegisterNetEvent("ND_Properties:getProperties", function()
     local src = source
     local info = {}
     local result = MySQL.query.await("SELECT * FROM nd_properties")
     if result then
-        local player = NDCore.Functions.GetPlayer(src)
+        local player = NDCore.getPlayer(src)
         for i = 1, #result do
             info[i] = {
                 id = result[i].id,
@@ -38,10 +36,10 @@ function getPlayers(src)
     for _, id in pairs(GetPlayers()) do
         local player_id = tonumber(id)
         if player_id ~= src then
-            local player = NDCore.Functions.GetPlayer(player_id)
+            local player = NDCore.getPlayer(player_id)
             local key = #players + 1
             players[key] = {}
-            players[key].name = player.firstName .. " " .. player.lastName
+            players[key].name = player.firstname .. " " .. player.lastname
             players[key].id = player_id
             players[key].character = player.id
         end
@@ -59,10 +57,10 @@ RegisterNetEvent("ND_Properties:purchaseProperty", function(propertyId)
         end
     end
     if not propertyBuying then return end
-    local player = NDCore.Functions.GetPlayer(src)
+    local player = NDCore.getPlayer(src)
     if not player then return end
     if player.bank < propertyBuying.price then return end
-    NDCore.Functions.DeductMoney(propertyBuying.price, src, "bank")
+    player.deductMoney("bank", propertyBuying.price, "Property Bought")
     local result = MySQL.query.await("SELECT `id` FROM nd_properties WHERE `id` = ? LIMIT 1", {propertyBuying.propertyid})
     if result and result[1] and result[1].id == propertyBuying.propertyid then return end
     MySQL.query("INSERT INTO nd_properties (id, owner, address) VALUES (?, ?, ?)", {propertyBuying.propertyid, player.id, propertyBuying.address})
@@ -74,7 +72,7 @@ end)
 
 RegisterNetEvent("ND_Properties:getOwnedProperties", function()
     local src = source
-    local player = NDCore.Functions.GetPlayer(src)
+    local player = NDCore.getPlayer(src)
     local result = MySQL.query.await("SELECT * FROM nd_properties WHERE `owner` = ?", {player.id})
     if not result then return end
     local players = getPlayers(src)
@@ -90,10 +88,10 @@ RegisterNetEvent("ND_Properties:grantAccess", function(grantTo, grantProperty)
     if not result then return end
     local access = json.decode(result[1].access)
 
-    local player = NDCore.Functions.GetPlayer(src)
+    local player = NDCore.getPlayer(src)
     if result[1].owner ~= player.id then return end
 
-    local user = NDCore.Functions.GetPlayer(grantTo)
+    local user = NDCore.getPlayer(grantTo)
     if not user then return end
     for _, ply in pairs(access) do
         if ply.character == user.id then return end
@@ -101,7 +99,7 @@ RegisterNetEvent("ND_Properties:grantAccess", function(grantTo, grantProperty)
 
     access[#access + 1] = {
         character = user.id,
-        name = user.firstName .. " " .. user.lastName
+        name = user.firstname .. " " .. user.lastname
     }
     MySQL.query.await("UPDATE nd_properties SET `access` = ? WHERE id = ?", {json.encode(access), grantProperty})
     TriggerClientEvent("ND_Properties:refresh", grantTo)
@@ -121,11 +119,11 @@ RegisterNetEvent("ND_Properties:removeAccess", function(removeCharacter, removeP
     if not result then return end
     local access = json.decode(result[1].access)
 
-    local player = NDCore.Functions.GetPlayer(src)
+    local player = NDCore.getPlayer(src)
     if result[1].owner ~= player.id then return end
 
     local removeSrc
-    local players = NDCore.Functions.GetPlayers()
+    local players = NDCore.getPlayers()
     for _, ply in pairs(players) do
         if ply.id == removeCharacter then
             removeSrc = ply.source

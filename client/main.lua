@@ -1,8 +1,7 @@
-NDCore = exports["ND_Core"]:GetCoreObject()
 local notified = false
 local open = false
 local blips = {}
-local selectedCharacter = NDCore.Functions.GetSelectedCharacter()
+local selectedCharacter = NDCore.getPlayer()
 if selectedCharacter then
     TriggerServerEvent("ND_Properties:getProperties")
 end
@@ -257,7 +256,7 @@ end)
 
 RegisterNUICallback("checkAccount", function(data)
     local id = data.id
-    local character = NDCore.Functions.GetSelectedCharacter()
+    local character = NDCore.getPlayer()
     local money = character.bank
     for _, property in pairs(properties) do
         if property.propertyid == id then
